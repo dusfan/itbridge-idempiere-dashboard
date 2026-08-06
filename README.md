@@ -1,16 +1,16 @@
 # iDempiere Sales Order App
 
 A Flutter mobile app for iDempiere: log in with a one-step login, browse Sales
-Orders, and create new orders with line items — all through iDempiere's REST
+Orders, and create new orders with line items all through iDempiere's REST
 API.
 
 ## Screens
 
 - **Splash** → **Login** (server URL, email, password, language) → **Select
   Role** (tenant/role/org/warehouse, fires the actual login)
-- **Orders** — list of Sales Orders, pull to refresh
-- **Create Order** — pick a business partner, doc type, and add line items
-- **Order Detail** — header info plus line items
+- **Orders**  list of Sales Orders, pull to refresh
+- **Create Order** pick a business partner, doc type, and add line items
+- **Order Detail** header info plus line items
 
 ## Stack
 
