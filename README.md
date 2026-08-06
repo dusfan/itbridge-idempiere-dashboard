@@ -37,6 +37,6 @@ for the account you're logging in as.
 This project pins `idempiere_rest` to a local patched copy under
 `vendor/idempiere_rest` (see `pubspec.yaml`'s `dependency_overrides`). The
 published `1.0.2` version's `oneStepLogin()` throws a
-`LateInitializationError` before the login request is ever sent — see
+`LateInitializationError` before the login request is ever sent see
 `vendor/idempiere_rest/lib/src/idempiere_client.dart` for the one-method fix.
 Safe to remove once that fix lands upstream.
