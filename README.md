@@ -1,16 +1,16 @@
 # iDempiere Sales Order App
 
 A Flutter mobile app for iDempiere: log in with a one-step login, browse Sales
-Orders, and create new orders with line items — all through iDempiere's REST
+Orders, and create new orders with line items all through iDempiere's REST
 API.
 
 ## Screens
 
 - **Splash** → **Login** (server URL, email, password, language) → **Select
   Role** (tenant/role/org/warehouse, fires the actual login)
-- **Orders** — list of Sales Orders, pull to refresh
-- **Create Order** — pick a business partner, doc type, and add line items
-- **Order Detail** — header info plus line items
+- **Orders**  list of Sales Orders, pull to refresh
+- **Create Order** pick a business partner, doc type, and add line items
+- **Order Detail** header info plus line items
 
 ## Stack
 
@@ -37,6 +37,6 @@ for the account you're logging in as.
 This project pins `idempiere_rest` to a local patched copy under
 `vendor/idempiere_rest` (see `pubspec.yaml`'s `dependency_overrides`). The
 published `1.0.2` version's `oneStepLogin()` throws a
-`LateInitializationError` before the login request is ever sent — see
+`LateInitializationError` before the login request is ever sent see
 `vendor/idempiere_rest/lib/src/idempiere_client.dart` for the one-method fix.
 Safe to remove once that fix lands upstream.
