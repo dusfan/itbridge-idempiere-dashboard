@@ -48,6 +48,7 @@ class MOrderLine extends ModelBase {
       'C_Order_ID': cOrderId,
       'M_Product_ID': mProductId,
       'QtyOrdered': qtyOrdered,
+      'QtyEntered': qtyOrdered,
       'PriceEntered': priceActual,
       'PriceActual': priceActual,
     };

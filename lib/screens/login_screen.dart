@@ -18,7 +18,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _serverController = TextEditingController(text: 'http://localhost:8081/api/v1');
+  final _serverController = TextEditingController(text: 'https://test.idempiere.org/api/v1');
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   String _language = 'en_US';

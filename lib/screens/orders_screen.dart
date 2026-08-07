@@ -28,7 +28,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
   }
 
   Future<List<MOrder>> _load() {
-    final filter = FilterBuilder()..addFilter('IsSOTrx', Operators.eq, 'Y');
+    final filter = FilterBuilder()..addFilter('IsSOTrx', Operators.eq, true);
     return IdempiereClient().get<MOrder>(
       '/models/c_order',
       (json) => MOrder(json),
