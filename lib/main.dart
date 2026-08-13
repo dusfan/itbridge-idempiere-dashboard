@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'session/auth_session.dart';
-import 'screens/splash_screen.dart';
-import 'theme.dart';
+import 'features/auth/auth_session.dart';
+import 'features/auth/splash_screen.dart';
+import 'core/theme.dart';
 
 void main() {
   runApp(const SalesOrderApp());

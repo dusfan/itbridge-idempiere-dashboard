@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:idempiere_rest/idempiere_rest.dart';
 
-import '../models/order.dart';
-import '../theme.dart';
+import 'order.dart';
+import '../../core/theme.dart';
 
 /// GET /models/c_order/{id}?$expand=C_OrderLine — fetches the order header
 /// and its lines in one call.

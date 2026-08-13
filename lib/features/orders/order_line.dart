@@ -1,6 +1,6 @@
 import 'package:idempiere_rest/idempiere_rest.dart';
 
-import 'rest_json.dart';
+import '../../utils/rest_json.dart';
 
 /// Wraps iDempiere's C_OrderLine (Sales Order line item).
 class MOrderLine extends ModelBase {

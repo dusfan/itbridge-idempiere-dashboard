@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../theme.dart';
+import '../core/theme.dart';
 
 /// Shared solid-navy pill button used across screens (login, submit, etc).
 class PrimaryButton extends StatelessWidget {

@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../session/auth_session.dart';
-import '../theme.dart';
-import '../widgets/app_text_field.dart';
-import '../widgets/primary_button.dart';
+import '../auth/auth_session.dart';
+import '../../core/theme.dart';
+import '../../widgets/app_text_field.dart';
+import '../../widgets/primary_button.dart';
 import 'select_role_screen.dart';
 
-/// Gathers credentials + server + language, then hands off to
-/// [SelectRoleScreen] which fires the actual one-step login call once the
-/// tenant/role/org are known too.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -24,6 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String _language = 'en_US';
   bool _rememberMe = true;
   bool _initialized = false;
+  bool _loading = false;
 
   static const _languages = ['en_US', 'es_ES', 'pt_BR'];
 
@@ -46,7 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _continue() {
+  Future<void> _continue() async {
     final serverUrl = _serverController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text;
@@ -58,17 +56,30 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => SelectRoleScreen(
-          baseUrl: serverUrl,
-          userName: email,
-          password: password,
-          language: _language,
-          rememberMe: _rememberMe,
+    setState(() => _loading = true);
+    final auth = context.read<AuthSession>();
+
+    try {
+      await auth.login(baseUrl: serverUrl, userName: email, password: password);
+      if (!mounted) return;
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => SelectRoleScreen(
+            baseUrl: serverUrl,
+            userName: email,
+            password: password,
+            language: _language,
+            rememberMe: _rememberMe,
+          ),
         ),
-      ),
-    );
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Invalid email or password.')),
+      );
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   @override
@@ -131,7 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   dense: true,
                 ),
                 const SizedBox(height: 24),
-                PrimaryButton(label: 'LOGIN', onPressed: _continue),
+                PrimaryButton(label: 'LOGIN', onPressed: _continue, loading: _loading),
                 const SizedBox(height: 16),
                 Center(
                   child: TextButton(

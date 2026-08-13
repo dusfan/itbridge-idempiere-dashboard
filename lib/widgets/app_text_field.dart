@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../theme.dart';
+import '../core/theme.dart';
 
 /// Shared styled input: small label above a white rounded field. Reused
 /// across every screen instead of restyling per field.
