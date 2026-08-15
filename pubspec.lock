@@ -116,8 +116,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: ee87826f43d7586b65eb423fc8698fca5c784cc0
-      resolved-ref: ee87826f43d7586b65eb423fc8698fca5c784cc0
+      ref: e91d432d4f51f35611edba52515942dbfb15cdee
+      resolved-ref: e91d432d4f51f35611edba52515942dbfb15cdee
       url: "https://github.com/dusfan/idempiere_rest.git"
     source: git
     version: "1.0.2"
