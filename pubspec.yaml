@@ -32,23 +32,17 @@ dependencies:
     sdk: flutter
 
   # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
 
-  # iDempiere REST client (one-step login, PO CRUD, filter/expand builders)
-  idempiere_rest: ^1.0.2
+  # Migrated to official remote repository with fix and passing tests
+  idempiere_rest:
+    git:
+      url: https://github.com/dusfan/idempiere_rest.git
+      ref: e91d432d4f51f35611edba52515942dbfb15cdee
   # App-wide auth/session state shared across screens
   provider: ^6.1.2
   # Persist server URL / remembered email across app restarts
   shared_preferences: ^2.3.2
-
-# Pinned to a locally patched copy: the published 1.0.2's oneStepLogin()
-# crashes with LateInitializationError('token') before it ever sends the
-# request (see vendor/idempiere_rest/lib/src/idempiere_client.dart for the
-# one-method fix). Safe to remove once that fix lands upstream.
-dependency_overrides:
-  idempiere_rest:
-    path: vendor/idempiere_rest
 
 dev_dependencies:
   flutter_test:
