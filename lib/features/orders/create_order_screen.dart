@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:idempiere_rest/idempiere_rest.dart';
 import 'package:provider/provider.dart';
 
-import '../models/order.dart';
-import '../models/order_line.dart';
-import '../session/auth_session.dart';
-import '../theme.dart';
-import '../widgets/app_text_field.dart';
-import '../widgets/primary_button.dart';
+import 'order.dart';
+import 'order_line.dart';
+import '../auth/auth_session.dart';
+import '../../core/theme.dart';
+import '../../widgets/app_text_field.dart';
+import '../../widgets/primary_button.dart';
 
 class _PendingLine {
   final int productId;

@@ -1,7 +1,7 @@
 import 'package:idempiere_rest/idempiere_rest.dart';
 
 import 'order_line.dart';
-import 'rest_json.dart';
+import '../../utils/rest_json.dart';
 
 /// Wraps iDempiere's C_Order (Sales Order header).
 class MOrder extends ModelBase {
