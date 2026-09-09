@@ -1,14 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:idempiere_rest/idempiere_rest.dart';
 // ignore: implementation_imports
-import 'package:idempiere_rest/src/session.dart'; // not re-exported by the package's public barrel
+import 'package:idempiere_rest/src/session.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Thin app-level wrapper around the [IdempiereClient] singleton.
-///
-/// The client already keeps the bearer token internally once logged in; this
-/// class exists so widgets can *watch* login state (via [ChangeNotifier]) and
-/// so screens building new records can read the logged-in org/warehouse.
 class AuthSession extends ChangeNotifier {
   static const _prefBaseUrl = 'idempiere_base_url';
   static const _prefEmail = 'idempiere_email';
@@ -16,6 +11,7 @@ class AuthSession extends ChangeNotifier {
   String? baseUrl;
   String? rememberedEmail;
   Session? session;
+  LoginResponse? loginResponse;
 
   bool get isLoggedIn => session != null;
 
@@ -31,6 +27,25 @@ class AuthSession extends ChangeNotifier {
     await prefs.setString(_prefBaseUrl, baseUrl);
     await prefs.setString(_prefEmail, email);
   }
+
+  Future<void> login({
+    required String baseUrl,
+    required String userName,
+    required String password,
+  }) async {
+    this.baseUrl = baseUrl;
+    IdempiereClient().setBaseUrl(baseUrl);
+    loginResponse = await IdempiereClient().login('/auth/tokens', userName, password);
+    notifyListeners();
+  }
+
+  Future<List<Role>> getRoles(int clientId) => IdempiereClient().getRoles(clientId);
+
+  Future<List<Organization>> getOrganizations(int clientId, int roleId) =>
+      IdempiereClient().getOrganizations(clientId, roleId);
+
+  Future<List<Warehouse>> getWarehouses(int clientId, int roleId, int orgId) =>
+      IdempiereClient().getWarehouses(clientId, roleId, orgId);
 
   Future<void> oneStepLogin({
     required String baseUrl,
@@ -59,6 +74,7 @@ class AuthSession extends ChangeNotifier {
 
   void logout() {
     session = null;
+    loginResponse = null;
     notifyListeners();
   }
 }

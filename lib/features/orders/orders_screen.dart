@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:idempiere_rest/idempiere_rest.dart';
 import 'package:provider/provider.dart';
 
-import '../models/order.dart';
-import '../session/auth_session.dart';
-import '../theme.dart';
-import '../widgets/primary_button.dart';
+import 'order.dart';
+import '../auth/auth_session.dart';
+import '../../core/theme.dart';
+import '../../widgets/primary_button.dart';
 import 'create_order_screen.dart';
-import 'login_screen.dart';
+import '../login/login_screen.dart';
 import 'order_detail_screen.dart';
 
 /// Home screen: card list of the logged-in user's Sales Orders.
@@ -28,7 +28,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
   }
 
   Future<List<MOrder>> _load() {
-    final filter = FilterBuilder()..addFilter('IsSOTrx', Operators.eq, 'Y');
+    final filter = FilterBuilder()..addFilter('IsSOTrx', Operators.eq, true);
     return IdempiereClient().get<MOrder>(
       '/models/c_order',
       (json) => MOrder(json),
