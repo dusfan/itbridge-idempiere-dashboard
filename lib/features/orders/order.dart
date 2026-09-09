@@ -1,7 +1,6 @@
 import 'package:idempiere_rest/idempiere_rest.dart';
-
-import 'order_line.dart';
-import '../../utils/rest_json.dart';
+import 'package:idempiere_sales_app/features/orders/order_line.dart';
+import 'package:idempiere_sales_app/utils/rest_json.dart';
 
 /// Wraps iDempiere's C_Order (Sales Order header).
 class MOrder extends ModelBase {
@@ -28,14 +27,14 @@ class MOrder extends ModelBase {
     this.mPriceListId,
     this.cCurrencyId,
     DateTime? dateOrdered,
-  })  : dateOrdered = dateOrdered ?? DateTime.now(),
-        super({});
+  }) : dateOrdered = dateOrdered ?? DateTime.now(),
+       super({});
 
   /// Deserializing constructor — passed as the ctor closure to
   /// [IdempiereClient.get]/[getRecord], e.g. `(json) => MOrder(json)`.
   MOrder(Map<String, dynamic> json)
-      : dateOrdered = DateTime.now(),
-        super(json) {
+    : dateOrdered = DateTime.now(),
+      super(json) {
     _populate(json);
   }
 
@@ -47,7 +46,8 @@ class MOrder extends ModelBase {
       dateOrdered = DateTime.tryParse(rawDate) ?? dateOrdered;
     }
     grandTotal = numOf(json['GrandTotal']);
-    docStatus = identifierOf(json['DocStatus']) ?? json['DocStatus']?.toString();
+    docStatus =
+        identifierOf(json['DocStatus']) ?? json['DocStatus']?.toString();
     cBPartnerId = idOf(json['C_BPartner_ID']) ?? cBPartnerId;
     bpartnerName = identifierOf(json['C_BPartner_ID']);
     adOrgId = idOf(json['AD_Org_ID']) ?? adOrgId;
@@ -55,7 +55,10 @@ class MOrder extends ModelBase {
 
     final rawLines = json['C_OrderLine'];
     if (rawLines is List) {
-      lines = rawLines.whereType<Map<String, dynamic>>().map((l) => MOrderLine(l)).toList();
+      lines = rawLines
+          .whereType<Map<String, dynamic>>()
+          .map((l) => MOrderLine(l))
+          .toList();
     }
   }
 

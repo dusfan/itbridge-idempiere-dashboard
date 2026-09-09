@@ -1,39 +1,31 @@
-import 'dart:async';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:idempiere_sales_app/core/app_config.dart';
-import 'package:idempiere_sales_app/core/app_strings.dart';
 import 'package:idempiere_sales_app/core/theme.dart';
 import 'package:idempiere_sales_app/features/auth/auth_session.dart';
+import 'package:idempiere_sales_app/features/login/login_controller.dart';
+import 'package:idempiere_sales_app/features/login/login_mobile_screen.dart';
+import 'package:idempiere_sales_app/features/login/login_tablet_screen.dart';
 import 'package:idempiere_sales_app/features/login/select_role_screen.dart';
 import 'package:idempiere_sales_app/features/login/widgets/login_card.dart';
 import 'package:provider/provider.dart';
 
-class LoginScreen extends StatefulWidget {
+/// Chooses a device-specific login design and connects it to [LoginController].
+class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (context) => LoginController(context.read<AuthSession>()),
+      child: const _LoginCoordinator(),
+    );
+  }
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  bool _loading = false;
-  bool _initialized = false;
-  String? _rememberedEmail;
-  String? _rememberedServer;
+class _LoginCoordinator extends StatelessWidget {
+  const _LoginCoordinator();
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_initialized) return;
-    final AuthSession auth = context.read<AuthSession>();
-    _rememberedEmail = auth.rememberedEmail;
-    _rememberedServer = auth.baseUrl;
-    _initialized = true;
-  }
-
-  void _showError(String message) {
+  void _showError(BuildContext context, String message) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
@@ -49,50 +41,44 @@ class _LoginScreenState extends State<LoginScreen> {
       );
   }
 
-  Future<void> _handleSubmit({
+  Future<void> _submit(
+    BuildContext context, {
     required String email,
     required String password,
     required String serverUrl,
     required bool rememberMe,
   }) async {
-    setState(() => _loading = true);
-    final AuthSession auth = context.read<AuthSession>();
-
-    try {
-      await auth.login(
-        baseUrl: serverUrl,
-        userName: email,
-        password: password,
-      );
-      if (!mounted) return;
-      await Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => SelectRoleScreen(
-            baseUrl: serverUrl,
-            userName: email,
-            password: password,
-            language: AppConfig.sessionLanguage,
-            rememberMe: rememberMe,
-          ),
-        ),
-      );
-    } on SocketException {
-      if (mounted) _showError(AppStrings.networkError);
-    } on TimeoutException {
-      if (mounted) _showError(AppStrings.networkError);
-    } catch (_) {
-      if (mounted) _showError(AppStrings.invalidCredentials);
-    } finally {
-      if (mounted) setState(() => _loading = false);
+    final result = await context.read<LoginController>().submit(
+      email: email,
+      password: password,
+      serverUrl: serverUrl,
+    );
+    if (!context.mounted) return;
+    if (!result.succeeded) {
+      _showError(context, result.errorMessage!);
+      return;
     }
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => SelectRoleScreen(
+          baseUrl: serverUrl,
+          userName: email,
+          password: password,
+          language: AppConfig.sessionLanguage,
+          rememberMe: rememberMe,
+        ),
+      ),
+    );
   }
 
-  void _handleForgotPassword() {
+  void _forgotPassword(BuildContext context) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: const Text(AppStrings.forgotPasswordHelp),
+          content: const Text(
+            'Contact your administrator to reset your password.',
+          ),
           behavior: SnackBarBehavior.floating,
           margin: const EdgeInsets.all(16),
           shape: RoundedRectangleBorder(
@@ -104,80 +90,34 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          final bool isWide =
-              constraints.maxWidth >= AppBreakpoints.tablet;
-          return isWide
-              ? _buildWideLayout(constraints)
-              : _buildCompactLayout(constraints);
-        },
-      ),
-    );
-  }
-
-  Widget _buildCompactLayout(BoxConstraints constraints) {
-    return _buildScreen(
-      image: 'assets/images/mobile_bg.jpg',
-      showBottomGradient: true,
-    );
-  }
-
-  Widget _buildWideLayout(BoxConstraints constraints) {
-    return _buildScreen(
-      image: 'assets/images/tablet_bg.jpg',
-      showBottomGradient: false,
-    );
-  }
-
-  Widget _buildScreen({required String image, required bool showBottomGradient}) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Image.asset(
-          image,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) =>
-              Container(color: AppColors.backdropTop),
-        ),
-        if (showBottomGradient)
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            height: 300,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                  colors: [
-                    Colors.black.withOpacity(0.8),
-                    Colors.black.withOpacity(0.3),
-                    Colors.transparent,
-                  ],
-                ),
+    return Consumer<LoginController>(
+      builder: (context, controller, _) {
+        final card = LoginCard(
+          loading: controller.isLoading,
+          initialEmail: controller.initialEmail,
+          initialServerUrl: controller.initialServerUrl,
+          onSubmit:
+              ({
+                required email,
+                required password,
+                required serverUrl,
+                required rememberMe,
+              }) => _submit(
+                context,
+                email: email,
+                password: password,
+                serverUrl: serverUrl,
+                rememberMe: rememberMe,
               ),
-            ),
-          ),
-        Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: LoginCard(
-                onSubmit: _handleSubmit,
-                onForgotPassword: _handleForgotPassword,
-                loading: _loading,
-                initialEmail: _rememberedEmail,
-                initialServerUrl: _rememberedServer,
-              ),
-            ),
-          ),
-        ),
-      ],
+          onForgotPassword: () => _forgotPassword(context),
+        );
+        return LayoutBuilder(
+          builder: (context, constraints) =>
+              constraints.maxWidth >= AppBreakpoints.tablet
+              ? LoginTabletScreen(loginCard: card)
+              : LoginMobileScreen(loginCard: card),
+        );
+      },
     );
   }
 }

@@ -2,7 +2,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:idempiere_sales_app/core/app_config.dart';
 import 'package:idempiere_sales_app/core/app_strings.dart';
-import 'package:idempiere_sales_app/core/theme.dart';
 import 'package:idempiere_sales_app/widgets/app_text_field.dart';
 import 'package:idempiere_sales_app/widgets/primary_button.dart';
 
@@ -54,7 +53,9 @@ class _LoginCardState extends State<LoginCard> {
   String? _passwordError;
   String? _serverError;
 
-  static final RegExp _emailPattern = RegExp(r'^[\w.+-]+@[\w-]+\.[\w.-]+$');
+  static final RegExp _emailPattern = RegExp(
+    r'^[\w.+-]+\s*@\s*[\w-]+\.[\w.-]+$',
+  );
 
   @override
   void dispose() {
@@ -118,7 +119,7 @@ class _LoginCardState extends State<LoginCard> {
         borderRadius: widget.borderRadius,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.18),
+            color: Colors.black.withValues(alpha: 0.18),
             blurRadius: 32,
             offset: const Offset(0, 12),
           ),
@@ -130,14 +131,19 @@ class _LoginCardState extends State<LoginCard> {
           filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.85),
+              color: Colors.white.withValues(alpha: 0.85),
               borderRadius: widget.borderRadius,
               border: Border.all(
-                color: Colors.white.withOpacity(0.50),
+                color: Colors.white.withValues(alpha: 0.50),
                 width: 1.5,
               ),
             ),
-            padding: EdgeInsets.fromLTRB(28, 32, 28, 28 + widget.extraBottomPadding),
+            padding: EdgeInsets.fromLTRB(
+              28,
+              32,
+              28,
+              28 + widget.extraBottomPadding,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -153,7 +159,7 @@ class _LoginCardState extends State<LoginCard> {
                 ),
                 const SizedBox(height: 4),
                 const Text(
-                  "Veuillez vous connecter à votre compte",
+                  'Veuillez vous connecter à votre compte',
                   style: TextStyle(
                     fontSize: 13,
                     color: Color(0xFF64748B),
@@ -200,7 +206,7 @@ class _LoginCardState extends State<LoginCard> {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFF39C12).withOpacity(0.35),
+                      color: const Color(0xFFF39C12).withValues(alpha: 0.35),
                       blurRadius: 16,
                       offset: const Offset(0, 6),
                     ),
@@ -272,8 +278,11 @@ class _LoginCardState extends State<LoginCard> {
   }
 
   Widget _buildRememberAndForgotRow() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Wrap(
+      alignment: WrapAlignment.spaceBetween,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      runSpacing: 8,
+      spacing: 8,
       children: [
         InkWell(
           onTap: widget.loading
@@ -294,7 +303,10 @@ class _LoginCardState extends State<LoginCard> {
                         ? null
                         : (bool? v) => setState(() => _rememberMe = v ?? false),
                     activeColor: const Color(0xFFF39C12),
-                    side: const BorderSide(color: Color(0xFFCBD5E1), width: 1.5),
+                    side: const BorderSide(
+                      color: Color(0xFFCBD5E1),
+                      width: 1.5,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4),
                     ),

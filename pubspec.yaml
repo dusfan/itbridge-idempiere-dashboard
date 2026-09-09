@@ -43,6 +43,8 @@ dependencies:
   provider: ^6.1.2
   # Persist server URL / remembered email across app restarts
   shared_preferences: ^2.3.2
+  dashboard_app:
+    path: dashboard-app
 
 dev_dependencies:
   flutter_test:

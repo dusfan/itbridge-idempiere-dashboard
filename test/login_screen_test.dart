@@ -72,6 +72,22 @@ void main() {
     expect(find.text(AppStrings.emailInvalid), findsOneWidget);
   });
 
+  testWidgets('accepts iDempiere emails with spaces around @', (
+    WidgetTester tester,
+  ) async {
+    await pumpLogin(tester, phone);
+
+    await tester.enterText(
+      find.byType(TextField).first,
+      'admin @ gardenworld.com',
+    );
+    await tester.tap(find.text(AppStrings.signIn));
+    await tester.pumpAndSettle();
+
+    expect(find.text(AppStrings.emailInvalid), findsNothing);
+    expect(find.text(AppStrings.passwordRequired), findsOneWidget);
+  });
+
   testWidgets('toggles password visibility', (WidgetTester tester) async {
     await pumpLogin(tester, phone);
 

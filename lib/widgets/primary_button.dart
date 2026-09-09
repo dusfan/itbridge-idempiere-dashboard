@@ -44,9 +44,9 @@ class _PrimaryButtonState extends State<PrimaryButton> {
             gradient: isDisabled
                 ? null
                 : (widget.gradient ??
-                    const LinearGradient(
-                      colors: [Color(0xFFF39C12), Color(0xFFE67E22)],
-                    )),
+                      const LinearGradient(
+                        colors: [Color(0xFFF39C12), Color(0xFFE67E22)],
+                      )),
             color: isDisabled
                 ? Colors.grey.shade400
                 : (widget.gradient == null ? widget.backgroundColor : null),
@@ -54,13 +54,15 @@ class _PrimaryButtonState extends State<PrimaryButton> {
             boxShadow: isDisabled
                 ? []
                 : (widget.boxShadow ??
-                    [
-                      BoxShadow(
-                        color: const Color(0xFFF39C12).withOpacity(0.35),
-                        blurRadius: 16,
-                        offset: const Offset(0, 6),
-                      ),
-                    ]),
+                      [
+                        BoxShadow(
+                          color: const Color(
+                            0xFFF39C12,
+                          ).withValues(alpha: 0.35),
+                          blurRadius: 16,
+                          offset: const Offset(0, 6),
+                        ),
+                      ]),
           ),
           alignment: Alignment.center,
           child: widget.loading

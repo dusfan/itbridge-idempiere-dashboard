@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:idempiere_sales_app/core/theme.dart';
 import 'package:idempiere_sales_app/features/auth/auth_session.dart';
+import 'package:idempiere_sales_app/features/dashboard/dashboard_screen.dart';
 import 'package:idempiere_sales_app/features/login/login_screen.dart';
-import 'package:idempiere_sales_app/features/orders/orders_screen.dart';
 import 'package:provider/provider.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -27,7 +27,7 @@ class _SplashScreenState extends State<SplashScreen> {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
         builder: (_) =>
-            auth.isLoggedIn ? const OrdersScreen() : const LoginScreen(),
+            auth.isLoggedIn ? const DashboardScreen() : const LoginScreen(),
       ),
     );
   }

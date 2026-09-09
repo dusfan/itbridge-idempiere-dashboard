@@ -1,6 +1,5 @@
 import 'package:idempiere_rest/idempiere_rest.dart';
-
-import '../../utils/rest_json.dart';
+import 'package:idempiere_sales_app/utils/rest_json.dart';
 
 /// Wraps iDempiere's C_OrderLine (Sales Order line item).
 class MOrderLine extends ModelBase {
@@ -25,9 +24,9 @@ class MOrderLine extends ModelBase {
   /// Deserializing constructor — passed as the ctor closure to
   /// [IdempiereClient.get]/[getRecord], e.g. `(json) => MOrderLine(json)`.
   MOrderLine(Map<String, dynamic> json)
-      : qtyOrdered = 0,
-        priceActual = 0,
-        super(json) {
+    : qtyOrdered = 0,
+      priceActual = 0,
+      super(json) {
     _populate(json);
   }
 
@@ -36,7 +35,9 @@ class MOrderLine extends ModelBase {
     cOrderId = idOf(json['C_Order_ID']) ?? cOrderId;
     mProductId = idOf(json['M_Product_ID']) ?? mProductId;
     productName = identifierOf(json['M_Product_ID']);
-    line = json['Line'] is int ? json['Line'] as int : int.tryParse('${json['Line']}') ?? line;
+    line = json['Line'] is int
+        ? json['Line'] as int
+        : int.tryParse('${json['Line']}') ?? line;
     qtyOrdered = numOf(json['QtyOrdered']) ?? qtyOrdered;
     priceActual = numOf(json['PriceActual']) ?? priceActual;
     lineNetAmt = numOf(json['LineNetAmt']);

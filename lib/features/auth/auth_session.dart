@@ -22,7 +22,10 @@ class AuthSession extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> rememberLogin({required String baseUrl, required String email}) async {
+  Future<void> rememberLogin({
+    required String baseUrl,
+    required String email,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_prefBaseUrl, baseUrl);
     await prefs.setString(_prefEmail, email);
@@ -35,11 +38,16 @@ class AuthSession extends ChangeNotifier {
   }) async {
     this.baseUrl = baseUrl;
     IdempiereClient().setBaseUrl(baseUrl);
-    loginResponse = await IdempiereClient().login('/auth/tokens', userName, password);
+    loginResponse = await IdempiereClient().login(
+      '/auth/tokens',
+      userName,
+      password,
+    );
     notifyListeners();
   }
 
-  Future<List<Role>> getRoles(int clientId) => IdempiereClient().getRoles(clientId);
+  Future<List<Role>> getRoles(int clientId) =>
+      IdempiereClient().getRoles(clientId);
 
   Future<List<Organization>> getOrganizations(int clientId, int roleId) =>
       IdempiereClient().getOrganizations(clientId, roleId);

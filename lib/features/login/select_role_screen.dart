@@ -1,27 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:idempiere_rest/idempiere_rest.dart';
+import 'package:idempiere_sales_app/core/theme.dart';
+import 'package:idempiere_sales_app/features/auth/auth_session.dart';
+import 'package:idempiere_sales_app/features/dashboard/dashboard_screen.dart';
+import 'package:idempiere_sales_app/widgets/primary_button.dart';
 import 'package:provider/provider.dart';
 
-import '../auth/auth_session.dart';
-import '../../core/theme.dart';
-import '../../widgets/primary_button.dart';
-import '../orders/orders_screen.dart';
-
 class SelectRoleScreen extends StatefulWidget {
-  final String baseUrl;
-  final String userName;
-  final String password;
-  final String language;
-  final bool rememberMe;
-
   const SelectRoleScreen({
-    super.key,
     required this.baseUrl,
     required this.userName,
     required this.password,
     required this.language,
     required this.rememberMe,
+    super.key,
   });
+
+  final String baseUrl;
+  final String userName;
+  final String password;
+  final String language;
+  final bool rememberMe;
 
   @override
   State<SelectRoleScreen> createState() => _SelectRoleScreenState();
@@ -122,7 +121,11 @@ class _SelectRoleScreenState extends State<SelectRoleScreen> {
 
     final auth = context.read<AuthSession>();
     try {
-      final warehouses = await auth.getWarehouses(_clientId!, _selectedRole!.id!, org.id!);
+      final warehouses = await auth.getWarehouses(
+        _clientId!,
+        _selectedRole!.id!,
+        org.id!,
+      );
       if (!mounted) return;
       setState(() {
         _warehouses = warehouses;
@@ -161,11 +164,14 @@ class _SelectRoleScreenState extends State<SelectRoleScreen> {
         language: widget.language,
       );
       if (widget.rememberMe) {
-        await auth.rememberLogin(baseUrl: widget.baseUrl, email: widget.userName);
+        await auth.rememberLogin(
+          baseUrl: widget.baseUrl,
+          email: widget.userName,
+        );
       }
       if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const OrdersScreen()),
+        MaterialPageRoute(builder: (_) => const DashboardScreen()),
         (route) => false,
       );
     } catch (e) {
@@ -186,15 +192,29 @@ class _SelectRoleScreenState extends State<SelectRoleScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 12, color: AppColors.label, fontWeight: FontWeight.w600)),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            color: AppColors.label,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         const SizedBox(height: 6),
         Container(
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+          ),
           padding: const EdgeInsets.symmetric(horizontal: 14),
           child: loading
               ? const Padding(
                   padding: EdgeInsets.symmetric(vertical: 14),
-                  child: SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2)),
+                  child: SizedBox(
+                    height: 18,
+                    width: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
                 )
               : DropdownButtonHideUnderline(
                   child: DropdownButton<T>(
@@ -202,7 +222,12 @@ class _SelectRoleScreenState extends State<SelectRoleScreen> {
                     isExpanded: true,
                     hint: const Text('Select...'),
                     items: items
-                        .map((item) => DropdownMenuItem<T>(value: item, child: Text(itemLabel(item))))
+                        .map(
+                          (item) => DropdownMenuItem<T>(
+                            value: item,
+                            child: Text(itemLabel(item)),
+                          ),
+                        )
                         .toList(),
                     onChanged: items.isEmpty ? null : onChanged,
                   ),
@@ -227,13 +252,20 @@ class _SelectRoleScreenState extends State<SelectRoleScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 20),
-                const Text('Select Role', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.navy)),
+                const Text(
+                  'Select Role',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.navy,
+                  ),
+                ),
                 const SizedBox(height: 24),
                 _dropdown<Role>(
                   label: 'Role',
                   value: _selectedRole,
                   items: _roles,
-                  itemLabel: (r) => r.name ?? 'Role ${r.id}',
+                  itemLabel: (r) => r.name,
                   onChanged: _onRoleSelected,
                   loading: _loadingRoles,
                 ),
@@ -241,7 +273,7 @@ class _SelectRoleScreenState extends State<SelectRoleScreen> {
                   label: 'Organization',
                   value: _selectedOrg,
                   items: _orgs,
-                  itemLabel: (o) => o.name ?? 'Org ${o.id}',
+                  itemLabel: (o) => o.name,
                   onChanged: _onOrgSelected,
                   loading: _loadingOrgs,
                 ),
@@ -249,7 +281,7 @@ class _SelectRoleScreenState extends State<SelectRoleScreen> {
                   label: 'Warehouse (optional)',
                   value: _selectedWarehouse,
                   items: _warehouses,
-                  itemLabel: (w) => w.name ?? 'Warehouse ${w.id}',
+                  itemLabel: (w) => w.name,
                   onChanged: (w) => setState(() => _selectedWarehouse = w),
                   loading: _loadingWarehouses,
                 ),
@@ -259,7 +291,11 @@ class _SelectRoleScreenState extends State<SelectRoleScreen> {
                   const SizedBox(height: 4),
                 ],
                 const SizedBox(height: 20),
-                PrimaryButton(label: 'ENTER', onPressed: _enter, loading: _entering),
+                PrimaryButton(
+                  label: 'ENTER',
+                  onPressed: _enter,
+                  loading: _entering,
+                ),
               ],
             ),
           ),
