@@ -1,6 +1,7 @@
-import 'package:dashboard_app/dashboard_app.dart' as dashboard;
 import 'package:flutter/material.dart';
 import 'package:idempiere_sales_app/features/auth/auth_session.dart';
+import 'package:idempiere_sales_app/features/dashboard/core/theme/app_theme.dart';
+import 'package:idempiere_sales_app/features/dashboard/presentation/dashboard_page.dart';
 import 'package:idempiere_sales_app/features/login/login_screen.dart';
 import 'package:idempiere_sales_app/features/orders/orders_screen.dart';
 import 'package:provider/provider.dart';
@@ -26,8 +27,8 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Theme(
-      data: dashboard.AppTheme.light,
-      child: dashboard.DashboardPage(
+      data: AppTheme.light,
+      child: DashboardPage(
         onLogout: () => _logout(context),
         onOpenOrders: () => _openOrders(context),
       ),

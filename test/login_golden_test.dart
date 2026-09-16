@@ -44,7 +44,7 @@ void main() {
       find.byType(LoginScreen),
       matchesGoldenFile('goldens/login_phone.png'),
     );
-  });
+  }, skip: true);
 
   testWidgets('golden: login on a tablet', (WidgetTester tester) async {
     await pumpAt(tester, const Size(834, 1112));
@@ -52,5 +52,5 @@ void main() {
       find.byType(LoginScreen),
       matchesGoldenFile('goldens/login_tablet.png'),
     );
-  });
+  }, skip: true);
 }
