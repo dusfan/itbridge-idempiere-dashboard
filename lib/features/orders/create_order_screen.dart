@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:idempiere_rest/idempiere_rest.dart';
+import 'package:idempiere_sales_app/core/theme.dart';
+import 'package:idempiere_sales_app/features/auth/auth_session.dart';
+import 'package:idempiere_sales_app/features/orders/order.dart';
+import 'package:idempiere_sales_app/features/orders/order_line.dart';
+import 'package:idempiere_sales_app/widgets/app_text_field.dart';
+import 'package:idempiere_sales_app/widgets/primary_button.dart';
 import 'package:provider/provider.dart';
-
-import 'order.dart';
-import 'order_line.dart';
-import '../auth/auth_session.dart';
-import '../../core/theme.dart';
-import '../../widgets/app_text_field.dart';
-import '../../widgets/primary_button.dart';
 
 class _PendingLine {
   final int productId;
@@ -37,7 +36,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   final _priceController = TextEditingController();
 
   DateTime _dateOrdered = DateTime.now();
-  late final TextEditingController _dateController = TextEditingController(text: _formatDate(_dateOrdered));
+  late final TextEditingController _dateController = TextEditingController(
+    text: _formatDate(_dateOrdered),
+  );
 
   final List<_PendingLine> _lines = [];
   bool _submitting = false;
@@ -79,7 +80,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     final price = num.tryParse(_priceController.text.trim());
     if (productId == null || qty == null || price == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Product, quantity and price must be valid numbers.')),
+        const SnackBar(
+          content: Text('Product, quantity and price must be valid numbers.'),
+        ),
       );
       return;
     }
@@ -96,11 +99,15 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     final docTypeId = int.tryParse(_docTypeController.text.trim());
     final priceListText = _priceListController.text.trim();
     final currencyText = _currencyController.text.trim();
-    final priceListId = priceListText.isEmpty ? null : int.tryParse(priceListText);
+    final priceListId = priceListText.isEmpty
+        ? null
+        : int.tryParse(priceListText);
     final currencyId = currencyText.isEmpty ? null : int.tryParse(currencyText);
 
     if (bpartnerId == null || docTypeId == null) {
-      setState(() => _error = 'Business Partner and Doc Type IDs are required.');
+      setState(
+        () => _error = 'Business Partner and Doc Type IDs are required.',
+      );
       return;
     }
     if (_lines.isEmpty) {
@@ -125,7 +132,10 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         dateOrdered: _dateOrdered,
       );
 
-      final created = await IdempiereClient().post<MOrder>('/models/c_order', header);
+      final created = await IdempiereClient().post<MOrder>(
+        '/models/c_order',
+        header,
+      );
 
       var lineNo = 10;
       for (final pending in _lines) {
@@ -167,7 +177,14 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                       icon: const Icon(Icons.arrow_back, color: AppColors.navy),
                       onPressed: () => Navigator.of(context).pop(false),
                     ),
-                    const Text('New Order', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.navy)),
+                    const Text(
+                      'New Order',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.navy,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -177,25 +194,69 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      AppTextField(label: 'Business Partner ID', controller: _bpartnerController, keyboardType: TextInputType.number),
-                      AppTextField(label: 'Doc Type (Target) ID', controller: _docTypeController, keyboardType: TextInputType.number),
-                      AppTextField(label: 'Date Ordered', controller: _dateController, readOnly: true, onTap: _pickDate),
-                      AppTextField(label: 'Price List ID (optional)', controller: _priceListController, keyboardType: TextInputType.number),
-                      AppTextField(label: 'Currency ID (optional)', controller: _currencyController, keyboardType: TextInputType.number),
+                      AppTextField(
+                        label: 'Business Partner ID',
+                        controller: _bpartnerController,
+                        keyboardType: TextInputType.number,
+                      ),
+                      AppTextField(
+                        label: 'Doc Type (Target) ID',
+                        controller: _docTypeController,
+                        keyboardType: TextInputType.number,
+                      ),
+                      AppTextField(
+                        label: 'Date Ordered',
+                        controller: _dateController,
+                        readOnly: true,
+                        onTap: _pickDate,
+                      ),
+                      AppTextField(
+                        label: 'Price List ID (optional)',
+                        controller: _priceListController,
+                        keyboardType: TextInputType.number,
+                      ),
+                      AppTextField(
+                        label: 'Currency ID (optional)',
+                        controller: _currencyController,
+                        keyboardType: TextInputType.number,
+                      ),
                       const Divider(height: 32),
-                      const Text('Order Lines', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.navy, fontSize: 16)),
+                      const Text(
+                        'Order Lines',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.navy,
+                          fontSize: 16,
+                        ),
+                      ),
                       const SizedBox(height: 12),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
                             flex: 2,
-                            child: AppTextField(label: 'Product ID', controller: _productController, keyboardType: TextInputType.number),
+                            child: AppTextField(
+                              label: 'Product ID',
+                              controller: _productController,
+                              keyboardType: TextInputType.number,
+                            ),
                           ),
                           const SizedBox(width: 8),
-                          Expanded(child: AppTextField(label: 'Qty', controller: _qtyController, keyboardType: TextInputType.number)),
+                          Expanded(
+                            child: AppTextField(
+                              label: 'Qty',
+                              controller: _qtyController,
+                              keyboardType: TextInputType.number,
+                            ),
+                          ),
                           const SizedBox(width: 8),
-                          Expanded(child: AppTextField(label: 'Price', controller: _priceController, keyboardType: TextInputType.number)),
+                          Expanded(
+                            child: AppTextField(
+                              label: 'Price',
+                              controller: _priceController,
+                              keyboardType: TextInputType.number,
+                            ),
+                          ),
                         ],
                       ),
                       Align(
@@ -203,7 +264,10 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                         child: TextButton.icon(
                           onPressed: _addLine,
                           icon: const Icon(Icons.add, color: AppColors.navy),
-                          label: const Text('ADD LINE', style: TextStyle(color: AppColors.navy)),
+                          label: const Text(
+                            'ADD LINE',
+                            style: TextStyle(color: AppColors.navy),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -213,21 +277,32 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                         return Card(
                           color: Colors.white,
                           elevation: 0,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                           margin: const EdgeInsets.only(bottom: 8),
                           child: ListTile(
                             dense: true,
-                            title: Text('Product #${line.productId}  ·  Qty ${line.qty}  ·  \$${line.price}'),
+                            title: Text(
+                              'Product #${line.productId}  ·  Qty ${line.qty}  ·  \$${line.price}',
+                            ),
                             trailing: IconButton(
-                              icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                              onPressed: () => setState(() => _lines.removeAt(i)),
+                              icon: const Icon(
+                                Icons.delete_outline,
+                                color: Colors.redAccent,
+                              ),
+                              onPressed: () =>
+                                  setState(() => _lines.removeAt(i)),
                             ),
                           ),
                         );
                       }),
                       if (_error != null) ...[
                         const SizedBox(height: 8),
-                        Text(_error!, style: const TextStyle(color: Colors.red)),
+                        Text(
+                          _error!,
+                          style: const TextStyle(color: Colors.red),
+                        ),
                       ],
                       const SizedBox(height: 24),
                     ],
@@ -236,7 +311,11 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 8, 24, 20),
-                child: PrimaryButton(label: 'CREATE ORDER', onPressed: _submit, loading: _submitting),
+                child: PrimaryButton(
+                  label: 'CREATE ORDER',
+                  onPressed: _submit,
+                  loading: _submitting,
+                ),
               ),
             ],
           ),

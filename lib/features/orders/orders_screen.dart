@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:idempiere_rest/idempiere_rest.dart';
+import 'package:idempiere_sales_app/core/theme.dart';
+import 'package:idempiere_sales_app/features/auth/auth_session.dart';
+import 'package:idempiere_sales_app/features/login/login_screen.dart';
+import 'package:idempiere_sales_app/features/orders/create_order_screen.dart';
+import 'package:idempiere_sales_app/features/orders/order.dart';
+import 'package:idempiere_sales_app/features/orders/order_detail_screen.dart';
+import 'package:idempiere_sales_app/widgets/primary_button.dart';
 import 'package:provider/provider.dart';
-
-import 'order.dart';
-import '../auth/auth_session.dart';
-import '../../core/theme.dart';
-import '../../widgets/primary_button.dart';
-import 'create_order_screen.dart';
-import '../login/login_screen.dart';
-import 'order_detail_screen.dart';
 
 /// Home screen: card list of the logged-in user's Sales Orders.
 class OrdersScreen extends StatefulWidget {
@@ -53,9 +52,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
   }
 
   Future<void> _openCreateOrder() async {
-    final created = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(builder: (_) => const CreateOrderScreen()),
-    );
+    final created = await Navigator.of(
+      context,
+    ).push<bool>(MaterialPageRoute(builder: (_) => const CreateOrderScreen()));
     if (created == true) _refresh();
   }
 
@@ -74,7 +73,14 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 child: Row(
                   children: [
                     const Expanded(
-                      child: Text('My Orders', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.navy)),
+                      child: Text(
+                        'My Orders',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.navy,
+                        ),
+                      ),
                     ),
                     IconButton(
                       icon: const Icon(Icons.logout, color: AppColors.navy),
@@ -94,7 +100,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       return Center(
                         child: Padding(
                           padding: const EdgeInsets.all(24),
-                          child: Text('Could not load orders:\n${snapshot.error}', textAlign: TextAlign.center),
+                          child: Text(
+                            'Could not load orders:\n${snapshot.error}',
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                       );
                     }
@@ -116,7 +125,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                 return _OrderCard(
                                   order: order,
                                   onTap: () => Navigator.of(context).push(
-                                    MaterialPageRoute(builder: (_) => OrderDetailScreen(orderId: order.id!)),
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          OrderDetailScreen(orderId: order.id!),
+                                    ),
                                   ),
                                 );
                               },
@@ -127,7 +139,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 8, 24, 20),
-                child: PrimaryButton(label: 'NEW ORDER', onPressed: _openCreateOrder),
+                child: PrimaryButton(
+                  label: 'NEW ORDER',
+                  onPressed: _openCreateOrder,
+                ),
               ),
             ],
           ),
@@ -153,15 +168,29 @@ class _OrderCard extends StatelessWidget {
       child: ListTile(
         onTap: onTap,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        title: Text(order.documentNo ?? 'Order #${order.id}', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.navy)),
-        subtitle: Text(order.bpartnerName ?? 'BPartner #${order.cBPartnerId ?? '-'}'),
+        title: Text(
+          order.documentNo ?? 'Order #${order.id}',
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: AppColors.navy,
+          ),
+        ),
+        subtitle: Text(
+          order.bpartnerName ?? 'BPartner #${order.cBPartnerId ?? '-'}',
+        ),
         trailing: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text('\$${(order.grandTotal ?? 0).toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              '\$${(order.grandTotal ?? 0).toStringAsFixed(2)}',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 4),
-            Text(order.docStatus ?? '', style: const TextStyle(fontSize: 11, color: AppColors.label)),
+            Text(
+              order.docStatus ?? '',
+              style: const TextStyle(fontSize: 11, color: AppColors.label),
+            ),
           ],
         ),
       ),
