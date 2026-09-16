@@ -14,11 +14,11 @@ class LoginController extends ChangeNotifier {
   bool _isLoading = false;
 
   bool get isLoading => _isLoading;
-  String? get initialEmail => _auth.rememberedEmail;
+  String? get initialUserName => _auth.rememberedUserName;
   String? get initialServerUrl => _auth.baseUrl;
 
   Future<LoginAttemptResult> submit({
-    required String email,
+    required String userName,
     required String password,
     required String serverUrl,
   }) async {
@@ -28,7 +28,7 @@ class LoginController extends ChangeNotifier {
     try {
       await _auth.login(
         baseUrl: serverUrl,
-        userName: email,
+        userName: userName,
         password: password,
       );
       return const LoginAttemptResult.success();
@@ -36,7 +36,11 @@ class LoginController extends ChangeNotifier {
       return const LoginAttemptResult.failure(AppStrings.networkError);
     } on TimeoutException {
       return const LoginAttemptResult.failure(AppStrings.networkError);
-    } catch (_) {
+    } catch (e) {
+      // THIS WILL EXPOSE WHY THE APP IS FAILING TO SEND THE REQUEST:
+      print('=== ACTUAL LOCAL ERROR ===');
+      print(e.toString());
+      
       return const LoginAttemptResult.failure(AppStrings.invalidCredentials);
     } finally {
       _isLoading = false;

@@ -7,7 +7,7 @@ import 'package:idempiere_sales_app/widgets/primary_button.dart';
 
 typedef LoginSubmit =
     void Function({
-      required String email,
+      required String userName,
       required String password,
       required String serverUrl,
       required bool rememberMe,
@@ -17,7 +17,7 @@ class LoginCard extends StatefulWidget {
   final LoginSubmit onSubmit;
   final VoidCallback onForgotPassword;
   final bool loading;
-  final String? initialEmail;
+  final String? initialUserName;
   final String? initialServerUrl;
   final BorderRadius borderRadius;
   final double extraBottomPadding;
@@ -27,7 +27,7 @@ class LoginCard extends StatefulWidget {
     required this.onForgotPassword,
     super.key,
     this.loading = false,
-    this.initialEmail,
+    this.initialUserName,
     this.initialServerUrl,
     this.borderRadius = const BorderRadius.all(Radius.circular(24.0)),
     this.extraBottomPadding = 0,
@@ -38,8 +38,8 @@ class LoginCard extends StatefulWidget {
 }
 
 class _LoginCardState extends State<LoginCard> {
-  late final TextEditingController _emailController = TextEditingController(
-    text: widget.initialEmail ?? '',
+  late final TextEditingController _userNameController = TextEditingController(
+    text: widget.initialUserName ?? '',
   );
   late final TextEditingController _serverController = TextEditingController(
     text: widget.initialServerUrl ?? AppConfig.defaultBaseUrl,
@@ -49,26 +49,21 @@ class _LoginCardState extends State<LoginCard> {
 
   bool _rememberMe = true;
   bool _showAdvanced = false;
-  String? _emailError;
+  String? _userNameError;
   String? _passwordError;
   String? _serverError;
 
-  static final RegExp _emailPattern = RegExp(
-    r'^[\w.+-]+\s*@\s*[\w-]+\.[\w.-]+$',
-  );
-
   @override
   void dispose() {
-    _emailController.dispose();
+    _userNameController.dispose();
     _serverController.dispose();
     _passwordController.dispose();
     _passwordFocus.dispose();
     super.dispose();
   }
 
-  String? _validateEmail(String value) {
-    if (value.isEmpty) return AppStrings.emailRequired;
-    if (!_emailPattern.hasMatch(value)) return AppStrings.emailInvalid;
+  String? _validateUserName(String value) {
+    if (value.isEmpty) return AppStrings.userNameRequired;
     return null;
   }
 
@@ -82,30 +77,30 @@ class _LoginCardState extends State<LoginCard> {
   }
 
   void _submit() {
-    final String email = _emailController.text.trim();
+    final String userName = _userNameController.text.trim();
     final String password = _passwordController.text;
     final String serverUrl = _serverController.text.trim();
 
-    final String? emailError = _validateEmail(email);
+    final String? userNameError = _validateUserName(userName);
     final String? passwordError = password.isEmpty
         ? AppStrings.passwordRequired
         : null;
     final String? serverError = _validateServer(serverUrl);
 
     setState(() {
-      _emailError = emailError;
+      _userNameError = userNameError;
       _passwordError = passwordError;
       _serverError = serverError;
       if (serverError != null) _showAdvanced = true;
     });
 
-    if (emailError != null || passwordError != null || serverError != null) {
+    if (userNameError != null || passwordError != null || serverError != null) {
       return;
     }
 
     FocusScope.of(context).unfocus();
     widget.onSubmit(
-      email: email,
+      userName: userName,
       password: password,
       serverUrl: serverUrl,
       rememberMe: _rememberMe,
@@ -168,14 +163,14 @@ class _LoginCardState extends State<LoginCard> {
                 ),
                 const SizedBox(height: 24),
                 AppTextField(
-                  label: AppStrings.email,
-                  controller: _emailController,
-                  hintText: AppStrings.emailHint,
+                  label: AppStrings.userName,
+                  controller: _userNameController,
+                  hintText: AppStrings.userNameHint,
                   prefixIcon: Icons.person_outline,
-                  keyboardType: TextInputType.emailAddress,
+                  keyboardType: TextInputType.text,
                   textInputAction: TextInputAction.next,
                   enabled: !widget.loading,
-                  errorText: _emailError,
+                  errorText: _userNameError,
                   onSubmitted: (_) => _passwordFocus.requestFocus(),
                 ),
                 AppTextField(

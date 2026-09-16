@@ -1,10 +1,22 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:idempiere_sales_app/core/theme.dart';
 import 'package:idempiere_sales_app/features/auth/auth_session.dart';
 import 'package:idempiere_sales_app/features/auth/splash_screen.dart';
 import 'package:provider/provider.dart';
 
+class DevHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+  }
+}
+
 void main() {
+  HttpOverrides.global = DevHttpOverrides();
   runApp(const SalesOrderApp());
 }
 

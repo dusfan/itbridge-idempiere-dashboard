@@ -6,7 +6,7 @@ class AppConfig {
   ///   flutter build apk --dart-define=IDEMPIERE_BASE_URL=https://erp.example.com/api/v1
   static const defaultBaseUrl = String.fromEnvironment(
     'IDEMPIERE_BASE_URL',
-    defaultValue: 'https://test.idempiere.org/api/v1',
+    defaultValue: 'https://169.58.184.185/api/v1',
   );
 
   /// Brand text is rendered as widgets and never baked into the background

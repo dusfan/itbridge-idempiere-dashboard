@@ -34,7 +34,7 @@ void main() {
     await pumpLogin(tester, phone);
 
     expect(find.text(AppStrings.loginTitle), findsOneWidget);
-    expect(find.text(AppStrings.email), findsOneWidget);
+    expect(find.text(AppStrings.userName), findsOneWidget);
     expect(find.text(AppStrings.password), findsOneWidget);
     expect(find.text(AppStrings.rememberMe), findsOneWidget);
     expect(find.text(AppStrings.signIn), findsOneWidget);
@@ -58,33 +58,20 @@ void main() {
     await tester.tap(find.text(AppStrings.signIn));
     await tester.pumpAndSettle();
 
-    expect(find.text(AppStrings.emailRequired), findsOneWidget);
+    expect(find.text(AppStrings.userNameRequired), findsOneWidget);
     expect(find.text(AppStrings.passwordRequired), findsOneWidget);
   });
 
-  testWidgets('rejects a malformed email', (WidgetTester tester) async {
-    await pumpLogin(tester, phone);
-
-    await tester.enterText(find.byType(TextField).first, 'not-an-email');
-    await tester.tap(find.text(AppStrings.signIn));
-    await tester.pumpAndSettle();
-
-    expect(find.text(AppStrings.emailInvalid), findsOneWidget);
-  });
-
-  testWidgets('accepts iDempiere emails with spaces around @', (
+  testWidgets('accepts any non-empty username', (
     WidgetTester tester,
   ) async {
     await pumpLogin(tester, phone);
 
-    await tester.enterText(
-      find.byType(TextField).first,
-      'admin @ gardenworld.com',
-    );
+    await tester.enterText(find.byType(TextField).first, 'SuperUser');
     await tester.tap(find.text(AppStrings.signIn));
     await tester.pumpAndSettle();
 
-    expect(find.text(AppStrings.emailInvalid), findsNothing);
+    expect(find.text(AppStrings.userNameRequired), findsNothing);
     expect(find.text(AppStrings.passwordRequired), findsOneWidget);
   });
 

@@ -165,8 +165,7 @@ class _SelectRoleScreenState extends State<SelectRoleScreen> {
       );
       if (widget.rememberMe) {
         await auth.rememberLogin(
-          baseUrl: widget.baseUrl,
-          email: widget.userName,
+          userName: widget.userName,
         );
       }
       if (!mounted) return;

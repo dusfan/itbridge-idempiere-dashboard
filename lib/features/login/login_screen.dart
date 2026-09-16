@@ -43,13 +43,13 @@ class _LoginCoordinator extends StatelessWidget {
 
   Future<void> _submit(
     BuildContext context, {
-    required String email,
+    required String userName,
     required String password,
     required String serverUrl,
     required bool rememberMe,
   }) async {
     final result = await context.read<LoginController>().submit(
-      email: email,
+      userName: userName,
       password: password,
       serverUrl: serverUrl,
     );
@@ -62,7 +62,7 @@ class _LoginCoordinator extends StatelessWidget {
       MaterialPageRoute<void>(
         builder: (_) => SelectRoleScreen(
           baseUrl: serverUrl,
-          userName: email,
+          userName: userName,
           password: password,
           language: AppConfig.sessionLanguage,
           rememberMe: rememberMe,
@@ -94,17 +94,17 @@ class _LoginCoordinator extends StatelessWidget {
       builder: (context, controller, _) {
         final card = LoginCard(
           loading: controller.isLoading,
-          initialEmail: controller.initialEmail,
+          initialUserName: controller.initialUserName,
           initialServerUrl: controller.initialServerUrl,
           onSubmit:
               ({
-                required email,
+                required userName,
                 required password,
                 required serverUrl,
                 required rememberMe,
               }) => _submit(
                 context,
-                email: email,
+                userName: userName,
                 password: password,
                 serverUrl: serverUrl,
                 rememberMe: rememberMe,
