@@ -29,6 +29,7 @@ class DashboardScreen extends StatelessWidget {
     return Theme(
       data: AppTheme.light,
       child: DashboardPage(
+        repository: const IdempiereDashboardRepository(),
         onLogout: () => _logout(context),
         onOpenOrders: () => _openOrders(context),
       ),

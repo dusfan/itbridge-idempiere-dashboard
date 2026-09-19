@@ -1,3 +1,4 @@
+import 'package:idempiere_rest/idempiere_rest.dart';
 import 'package:idempiere_sales_app/features/dashboard/core/theme/app_theme.dart';
 import 'package:idempiere_sales_app/features/dashboard/domain/dashboard_models.dart';
 
@@ -7,6 +8,7 @@ abstract class DashboardRepository {
   List<double> get sales;
   List<PaymentSummary> get payments;
   List<Flight> get topFlights;
+  Future<int> get ticketsTodayCount;
 }
 
 class MockDashboardRepository implements DashboardRepository {
@@ -118,4 +120,59 @@ class MockDashboardRepository implements DashboardRepository {
         Flight(code: 'EK740', route: 'Alger → Dubaï', rate: '68%'),
         Flight(code: 'QR139', route: 'Alger → Doha', rate: '64%'),
       ];
+
+  @override
+  Future<int> get ticketsTodayCount => Future.value(248);
+}
+
+/// Loads the live ticket count from the flight-details view configured in the
+/// dashboard Postman collection.
+class IdempiereDashboardRepository extends MockDashboardRepository {
+  const IdempiereDashboardRepository();
+
+  static const _pageSize = 100;
+
+  @override
+  Future<int> get ticketsTodayCount async {
+    final filter = FilterBuilder()
+      ..addFilter(
+        'DepartDateTime_Direct',
+        Operators.ge,
+        const _CurrentDateFilterValue(),
+      );
+
+    var count = 0;
+    for (var skip = 0;; skip += _pageSize) {
+      final details = await IdempiereClient().get<_FlightDetail>(
+        '/models/rv_vol_details_rest',
+        _FlightDetail.new,
+        filter: filter,
+        top: _pageSize,
+        skip: skip,
+      );
+      count += details.length;
+
+      if (details.length < _pageSize) return count;
+    }
+  }
+}
+
+/// Produces the server-side `current_date` expression without quoting it.
+class _CurrentDateFilterValue {
+  const _CurrentDateFilterValue();
+
+  @override
+  String toString() => 'current_date';
+}
+
+/// The KPI only needs a record for counting, but the REST client requires a
+/// model type to deserialize each row returned by the view.
+class _FlightDetail extends ModelBase {
+  _FlightDetail(Map<String, dynamic> json) : super(json);
+
+  @override
+  _FlightDetail fromJson(Map<String, dynamic> json) => _FlightDetail(json);
+
+  @override
+  Map<String, dynamic> toJson() => const {};
 }
