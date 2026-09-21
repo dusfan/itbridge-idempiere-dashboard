@@ -11,6 +11,7 @@ class AuthSession extends ChangeNotifier {
   String? rememberedUserName;
   Session? session;
   LoginResponse? loginResponse;
+  List<Client> clients = [];
 
   bool get isLoggedIn => session != null;
 
@@ -50,6 +51,7 @@ class AuthSession extends ChangeNotifier {
       userName,
       password,
     );
+    clients = loginResponse?.clients ?? <Client>[];
     notifyListeners();
   }
 
@@ -90,6 +92,7 @@ class AuthSession extends ChangeNotifier {
   void logout() {
     session = null;
     loginResponse = null;
+    clients = [];
     notifyListeners();
   }
 }
