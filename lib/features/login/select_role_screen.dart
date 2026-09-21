@@ -29,6 +29,9 @@ class SelectRoleScreen extends StatefulWidget {
 class _SelectRoleScreenState extends State<SelectRoleScreen> {
   int? _clientId;
 
+  List<Client> _clients = [];
+  Client? _selectedClient;
+
   List<Role> _roles = [];
   Role? _selectedRole;
 
@@ -47,12 +50,30 @@ class _SelectRoleScreenState extends State<SelectRoleScreen> {
   @override
   void initState() {
     super.initState();
+    _loadClients();
+  }
+
+  void _loadClients() {
+    final auth = context.read<AuthSession>();
+    final clients = auth.clients;
+
+    if (clients.isEmpty) {
+      setState(() {
+        _error = 'No client available for this user.';
+        _loadingRoles = false;
+      });
+      return;
+    }
+
+    _clients = clients;
+    _selectedClient = clients.first;
+    _clientId = clients.first.id;
     _loadRoles();
   }
 
   Future<void> _loadRoles() async {
     final auth = context.read<AuthSession>();
-    final clientId = auth.loginResponse?.clients.first.id;
+    final clientId = _clientId;
 
     if (clientId == null) {
       setState(() {
@@ -61,8 +82,6 @@ class _SelectRoleScreenState extends State<SelectRoleScreen> {
       });
       return;
     }
-
-    _clientId = clientId;
 
     try {
       final roles = await auth.getRoles(clientId);
@@ -78,6 +97,24 @@ class _SelectRoleScreenState extends State<SelectRoleScreen> {
         _loadingRoles = false;
       });
     }
+  }
+
+  Future<void> _onClientSelected(Client? client) async {
+    if (client == null || client.id == _clientId) return;
+    setState(() {
+      _selectedClient = client;
+      _clientId = client.id;
+      _roles = [];
+      _selectedRole = null;
+      _orgs = [];
+      _selectedOrg = null;
+      _warehouses = [];
+      _selectedWarehouse = null;
+      _loadingRoles = true;
+      _error = null;
+    });
+
+    await _loadRoles();
   }
 
   Future<void> _onRoleSelected(Role? role) async {
@@ -141,8 +178,10 @@ class _SelectRoleScreenState extends State<SelectRoleScreen> {
   }
 
   Future<void> _enter() async {
-    if (_clientId == null || _selectedRole == null || _selectedOrg == null) {
-      setState(() => _error = 'Please select a role and organization.');
+    if (_selectedClient == null ||
+        _selectedRole == null ||
+        _selectedOrg == null) {
+      setState(() => _error = 'Please select a client, role, and organization.');
       return;
     }
 
@@ -260,6 +299,13 @@ class _SelectRoleScreenState extends State<SelectRoleScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
+                _dropdown<Client>(
+                  label: 'Client',
+                  value: _selectedClient,
+                  items: _clients,
+                  itemLabel: (c) => c.name,
+                  onChanged: _onClientSelected,
+                ),
                 _dropdown<Role>(
                   label: 'Role',
                   value: _selectedRole,
