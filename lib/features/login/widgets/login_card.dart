@@ -2,13 +2,12 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:idempiere_sales_app/core/app_config.dart';
 import 'package:idempiere_sales_app/core/app_strings.dart';
-import 'package:idempiere_sales_app/core/theme.dart';
 import 'package:idempiere_sales_app/widgets/app_text_field.dart';
 import 'package:idempiere_sales_app/widgets/primary_button.dart';
 
 typedef LoginSubmit =
     void Function({
-      required String email,
+      required String userName,
       required String password,
       required String serverUrl,
       required bool rememberMe,
@@ -18,7 +17,7 @@ class LoginCard extends StatefulWidget {
   final LoginSubmit onSubmit;
   final VoidCallback onForgotPassword;
   final bool loading;
-  final String? initialEmail;
+  final String? initialUserName;
   final String? initialServerUrl;
   final BorderRadius borderRadius;
   final double extraBottomPadding;
@@ -28,7 +27,7 @@ class LoginCard extends StatefulWidget {
     required this.onForgotPassword,
     super.key,
     this.loading = false,
-    this.initialEmail,
+    this.initialUserName,
     this.initialServerUrl,
     this.borderRadius = const BorderRadius.all(Radius.circular(24.0)),
     this.extraBottomPadding = 0,
@@ -39,8 +38,8 @@ class LoginCard extends StatefulWidget {
 }
 
 class _LoginCardState extends State<LoginCard> {
-  late final TextEditingController _emailController = TextEditingController(
-    text: widget.initialEmail ?? '',
+  late final TextEditingController _userNameController = TextEditingController(
+    text: widget.initialUserName ?? '',
   );
   late final TextEditingController _serverController = TextEditingController(
     text: widget.initialServerUrl ?? AppConfig.defaultBaseUrl,
@@ -50,24 +49,21 @@ class _LoginCardState extends State<LoginCard> {
 
   bool _rememberMe = true;
   bool _showAdvanced = false;
-  String? _emailError;
+  String? _userNameError;
   String? _passwordError;
   String? _serverError;
 
-  static final RegExp _emailPattern = RegExp(r'^[\w.+-]+@[\w-]+\.[\w.-]+$');
-
   @override
   void dispose() {
-    _emailController.dispose();
+    _userNameController.dispose();
     _serverController.dispose();
     _passwordController.dispose();
     _passwordFocus.dispose();
     super.dispose();
   }
 
-  String? _validateEmail(String value) {
-    if (value.isEmpty) return AppStrings.emailRequired;
-    if (!_emailPattern.hasMatch(value)) return AppStrings.emailInvalid;
+  String? _validateUserName(String value) {
+    if (value.isEmpty) return AppStrings.userNameRequired;
     return null;
   }
 
@@ -81,30 +77,30 @@ class _LoginCardState extends State<LoginCard> {
   }
 
   void _submit() {
-    final String email = _emailController.text.trim();
+    final String userName = _userNameController.text.trim();
     final String password = _passwordController.text;
     final String serverUrl = _serverController.text.trim();
 
-    final String? emailError = _validateEmail(email);
+    final String? userNameError = _validateUserName(userName);
     final String? passwordError = password.isEmpty
         ? AppStrings.passwordRequired
         : null;
     final String? serverError = _validateServer(serverUrl);
 
     setState(() {
-      _emailError = emailError;
+      _userNameError = userNameError;
       _passwordError = passwordError;
       _serverError = serverError;
       if (serverError != null) _showAdvanced = true;
     });
 
-    if (emailError != null || passwordError != null || serverError != null) {
+    if (userNameError != null || passwordError != null || serverError != null) {
       return;
     }
 
     FocusScope.of(context).unfocus();
     widget.onSubmit(
-      email: email,
+      userName: userName,
       password: password,
       serverUrl: serverUrl,
       rememberMe: _rememberMe,
@@ -118,7 +114,7 @@ class _LoginCardState extends State<LoginCard> {
         borderRadius: widget.borderRadius,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.18),
+            color: Colors.black.withValues(alpha: 0.18),
             blurRadius: 32,
             offset: const Offset(0, 12),
           ),
@@ -130,14 +126,19 @@ class _LoginCardState extends State<LoginCard> {
           filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.85),
+              color: Colors.white.withValues(alpha: 0.85),
               borderRadius: widget.borderRadius,
               border: Border.all(
-                color: Colors.white.withOpacity(0.50),
+                color: Colors.white.withValues(alpha: 0.50),
                 width: 1.5,
               ),
             ),
-            padding: EdgeInsets.fromLTRB(28, 32, 28, 28 + widget.extraBottomPadding),
+            padding: EdgeInsets.fromLTRB(
+              28,
+              32,
+              28,
+              28 + widget.extraBottomPadding,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -153,7 +154,7 @@ class _LoginCardState extends State<LoginCard> {
                 ),
                 const SizedBox(height: 4),
                 const Text(
-                  "Veuillez vous connecter à votre compte",
+                  'Veuillez vous connecter à votre compte',
                   style: TextStyle(
                     fontSize: 13,
                     color: Color(0xFF64748B),
@@ -162,14 +163,14 @@ class _LoginCardState extends State<LoginCard> {
                 ),
                 const SizedBox(height: 24),
                 AppTextField(
-                  label: AppStrings.email,
-                  controller: _emailController,
-                  hintText: AppStrings.emailHint,
+                  label: AppStrings.userName,
+                  controller: _userNameController,
+                  hintText: AppStrings.userNameHint,
                   prefixIcon: Icons.person_outline,
-                  keyboardType: TextInputType.emailAddress,
+                  keyboardType: TextInputType.text,
                   textInputAction: TextInputAction.next,
                   enabled: !widget.loading,
-                  errorText: _emailError,
+                  errorText: _userNameError,
                   onSubmitted: (_) => _passwordFocus.requestFocus(),
                 ),
                 AppTextField(
@@ -200,7 +201,7 @@ class _LoginCardState extends State<LoginCard> {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFF39C12).withOpacity(0.35),
+                      color: const Color(0xFFF39C12).withValues(alpha: 0.35),
                       blurRadius: 16,
                       offset: const Offset(0, 6),
                     ),
@@ -272,8 +273,11 @@ class _LoginCardState extends State<LoginCard> {
   }
 
   Widget _buildRememberAndForgotRow() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Wrap(
+      alignment: WrapAlignment.spaceBetween,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      runSpacing: 8,
+      spacing: 8,
       children: [
         InkWell(
           onTap: widget.loading
@@ -294,7 +298,10 @@ class _LoginCardState extends State<LoginCard> {
                         ? null
                         : (bool? v) => setState(() => _rememberMe = v ?? false),
                     activeColor: const Color(0xFFF39C12),
-                    side: const BorderSide(color: Color(0xFFCBD5E1), width: 1.5),
+                    side: const BorderSide(
+                      color: Color(0xFFCBD5E1),
+                      width: 1.5,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4),
                     ),

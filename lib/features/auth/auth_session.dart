@@ -5,27 +5,31 @@ import 'package:idempiere_rest/src/session.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthSession extends ChangeNotifier {
-  static const _prefBaseUrl = 'idempiere_base_url';
-  static const _prefEmail = 'idempiere_email';
+  static const _prefUserName = 'idempiere_username';
 
   String? baseUrl;
-  String? rememberedEmail;
+  String? rememberedUserName;
   Session? session;
   LoginResponse? loginResponse;
+  List<Client> clients = [];
 
   bool get isLoggedIn => session != null;
 
   Future<void> loadRemembered() async {
     final prefs = await SharedPreferences.getInstance();
-    baseUrl = prefs.getString(_prefBaseUrl);
-    rememberedEmail = prefs.getString(_prefEmail);
+    rememberedUserName = prefs.getString(_prefUserName);
+
+    print('=== LOADED FROM STORAGE ===');
+    print('SAVED USERNAME: $rememberedUserName');
+
     notifyListeners();
   }
 
-  Future<void> rememberLogin({required String baseUrl, required String email}) async {
+  Future<void> rememberLogin({
+    required String userName,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_prefBaseUrl, baseUrl);
-    await prefs.setString(_prefEmail, email);
+    await prefs.setString(_prefUserName, userName);
   }
 
   Future<void> login({
@@ -34,12 +38,25 @@ class AuthSession extends ChangeNotifier {
     required String password,
   }) async {
     this.baseUrl = baseUrl;
+    final fullUrl = '${baseUrl.replaceAll(RegExp(r'/+$'), '')}/auth/tokens';
+
+    print('=== AUTH SESSION LOGIN ===');
+    print('BASE URL SET: $baseUrl');
+    print('FULL ENDPOINT: $fullUrl');
+    print('USERNAME: $userName');
+
     IdempiereClient().setBaseUrl(baseUrl);
-    loginResponse = await IdempiereClient().login('/auth/tokens', userName, password);
+    loginResponse = await IdempiereClient().login(
+      '/auth/tokens',
+      userName,
+      password,
+    );
+    clients = loginResponse?.clients ?? <Client>[];
     notifyListeners();
   }
 
-  Future<List<Role>> getRoles(int clientId) => IdempiereClient().getRoles(clientId);
+  Future<List<Role>> getRoles(int clientId) =>
+      IdempiereClient().getRoles(clientId);
 
   Future<List<Organization>> getOrganizations(int clientId, int roleId) =>
       IdempiereClient().getOrganizations(clientId, roleId);
@@ -75,6 +92,7 @@ class AuthSession extends ChangeNotifier {
   void logout() {
     session = null;
     loginResponse = null;
+    clients = [];
     notifyListeners();
   }
 }

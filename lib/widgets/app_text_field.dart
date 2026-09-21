@@ -58,9 +58,7 @@ class _AppTextFieldState extends State<AppTextField> {
     if (suffix == null && widget.obscureText) {
       suffix = IconButton(
         icon: Icon(
-          _obscured
-              ? Icons.visibility_outlined
-              : Icons.visibility_off_outlined,
+          _obscured ? Icons.visibility_outlined : Icons.visibility_off_outlined,
           size: 20,
           color: const Color(0xFF64748B),
         ),
@@ -96,7 +94,9 @@ class _AppTextFieldState extends State<AppTextField> {
             hintText: widget.hintText,
             hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
             filled: true,
-            fillColor: widget.enabled ? const Color(0xFDF8FAFC) : AppColors.border,
+            fillColor: widget.enabled
+                ? const Color(0xFDF8FAFC)
+                : AppColors.border,
             prefixIcon: widget.prefixIcon == null
                 ? null
                 : Icon(

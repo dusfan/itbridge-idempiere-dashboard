@@ -1,10 +1,4 @@
 import 'package:flutter/material.dart';
-
-/// Design tokens for the Executive Dashboard design system.
-///
-/// Taken from the approved mockups: white cards on a light canvas, a vivid
-/// blue primary, and slate text. Screens pull from here instead of
-/// hard-coding colors, so a palette change is a one-file change.
 class AppColors {
   // Brand
   static const primary = Color(0xFF2563EB);
