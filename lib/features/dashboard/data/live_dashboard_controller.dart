@@ -85,16 +85,14 @@ class DashboardController extends ChangeNotifier {
       var pendingSum = 0.0;
       final byBank = <String, double>{};
       final byDate = <DateTime, double>{};
-      var bankIndex = 1;
 
       for (final record in records) {
         totalBalSum += record.totalBal;
         currentBankBalSum += record.currentBankBal;
         pendingSum += record.pendingBal;
 
-        final bank = record.bankName ?? 'Compte $bankIndex';
+        final bank = record.bankName ?? 'Banque ${byBank.length + 1}';
         byBank[bank] = (byBank[bank] ?? 0) + record.totalBal;
-        bankIndex++;
 
         final date = record.date;
         if (date != null) byDate[date] = (byDate[date] ?? 0) + record.totalBal;
@@ -110,11 +108,17 @@ class DashboardController extends ChangeNotifier {
       final dates = byDate.keys.toList()..sort();
       _chartValues = dates.map((date) => byDate[date]!).toList();
 
+      print('=== DASHBOARD CHART DATA (X-axis = day, Y-axis = sum Total_Bal) ===');
+      print('Dates (${dates.length}):');
+      for (final date in dates) {
+        print('  ${date.toIso8601String().substring(0, 10)} -> ${byDate[date]}');
+      }
+
       _soldeReel = Metric(
         label: 'Solde réel',
-        value: _formatAmount(pendingSum),
+        value: _formatAmount(currentBankBalSum),
         change: '',
-        isPositive: pendingSum >= 0,
+        isPositive: currentBankBalSum >= 0,
       );
       _soldeTotal = Metric(
         label: 'Solde total',
@@ -124,9 +128,9 @@ class DashboardController extends ChangeNotifier {
       );
       _soldeEnCours = Metric(
         label: 'Solde en cours',
-        value: _formatAmount(currentBankBalSum),
+        value: _formatAmount(pendingSum),
         change: '',
-        isPositive: currentBankBalSum >= 0,
+        isPositive: pendingSum >= 0,
       );
     } on SocketException catch (e) {
       print('=== DASHBOARD NETWORK ERROR ===');

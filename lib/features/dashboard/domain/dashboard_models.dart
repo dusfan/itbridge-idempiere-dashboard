@@ -1,3 +1,5 @@
+import 'package:idempiere_sales_app/utils/rest_json.dart';
+
 class Metric {
   const Metric({
     required this.label,
@@ -35,7 +37,8 @@ class DailyBankRecord {
       currentBankBal: _readNum(json, 'CurrentBank_Bal'),
       arNoClearNoReconBal: _readNum(json, 'AR_NoClear_NoRecon_Bal'),
       apNoClearNoReconBal: _readNum(json, 'AP_NoClear_NoRecon_Bal'),
-      bankName: _readString(json, 'BankName') ??
+      bankName: identifierOf(json['C_BankAccount_ID']) ??
+          _readString(json, 'BankName') ??
           _readString(json, 'Bank_Name') ??
           _readString(json, 'BankAccountName') ??
           _readString(json, 'AD_Org_Name'),
@@ -66,7 +69,13 @@ class DailyBankRecord {
   }
 
   static DateTime? _readDate(Map<String, dynamic> json) {
-    for (final key in const ['DateAcct', 'DateTrx', 'MovementDate', 'Date']) {
+    for (final key in const [
+      'Created',
+      'DateAcct',
+      'DateTrx',
+      'MovementDate',
+      'Date',
+    ]) {
       final raw = json[key];
       if (raw is String && raw.isNotEmpty) {
         final parsed = DateTime.tryParse(raw);
