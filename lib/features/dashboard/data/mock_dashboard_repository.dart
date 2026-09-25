@@ -1,4 +1,6 @@
-import 'package:idempiere_rest/idempiere_rest.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
 import 'package:idempiere_sales_app/features/dashboard/core/theme/app_theme.dart';
 import 'package:idempiere_sales_app/features/dashboard/domain/dashboard_models.dart';
 
@@ -125,54 +127,54 @@ class MockDashboardRepository implements DashboardRepository {
   Future<int> get ticketsTodayCount => Future.value(248);
 }
 
-/// Loads the live ticket count from the flight-details view configured in the
-/// dashboard Postman collection.
+/// Loads today's ticket total from the ticket-list endpoint specified by the
+/// dashboard API collection.
 class IdempiereDashboardRepository extends MockDashboardRepository {
-  const IdempiereDashboardRepository();
+  const IdempiereDashboardRepository({
+    required this.baseUrl,
+    required this.accessToken,
+  });
 
-  static const _pageSize = 100;
+  final String baseUrl;
+  final String accessToken;
 
   @override
   Future<int> get ticketsTodayCount async {
-    final filter = FilterBuilder()
-      ..addFilter(
-        'DepartDateTime_Direct',
-        Operators.ge,
-        const _CurrentDateFilterValue(),
-      );
+    final today = DateTime.now().toIso8601String().split('T').first;
+    final response = await http.get(
+      Uri.parse('$baseUrl/models/c_order').replace(
+        queryParameters: {
+          r'$select': 'C_Order_ID,documentno',
+          r'$filter':
+              "tickettype in ('1', '2', '3', '4', '5') and "
+              "dateordered ge $today and TypeEntry eq '1'",
+          // We only need the total, so do not download every ticket row.
+          r'$top': '1',
+        },
+      ),
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+    final responseBody = utf8.decode(response.bodyBytes);
 
-    var count = 0;
-    for (var skip = 0;; skip += _pageSize) {
-      final details = await IdempiereClient().get<_FlightDetail>(
-        '/models/rv_vol_details_rest',
-        _FlightDetail.new,
-        filter: filter,
-        top: _pageSize,
-        skip: skip,
+    if (response.statusCode != 200) {
+      throw StateError(
+        'Ticket list request failed (${response.statusCode}): '
+        '$responseBody',
       );
-      count += details.length;
-
-      if (details.length < _pageSize) return count;
     }
+
+    final decoded = jsonDecode(responseBody) as Map<String, dynamic>;
+    final rowCount = decoded['row-count'];
+    if (rowCount is num) {
+      return rowCount.toInt();
+    }
+    final parsedRowCount = int.tryParse(rowCount?.toString() ?? '');
+    if (parsedRowCount == null) {
+      throw StateError('Ticket list response does not contain row-count.');
+    }
+    return parsedRowCount;
   }
-}
-
-/// Produces the server-side `current_date` expression without quoting it.
-class _CurrentDateFilterValue {
-  const _CurrentDateFilterValue();
-
-  @override
-  String toString() => 'current_date';
-}
-
-/// The KPI only needs a record for counting, but the REST client requires a
-/// model type to deserialize each row returned by the view.
-class _FlightDetail extends ModelBase {
-  _FlightDetail(Map<String, dynamic> json) : super(json);
-
-  @override
-  _FlightDetail fromJson(Map<String, dynamic> json) => _FlightDetail(json);
-
-  @override
-  Map<String, dynamic> toJson() => const {};
 }

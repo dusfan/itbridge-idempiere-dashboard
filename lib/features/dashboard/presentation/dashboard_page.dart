@@ -127,6 +127,11 @@ class _DashboardContent extends StatelessWidget {
     return FutureBuilder<int>(
       future: ticketsTodayCount,
       builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          debugPrint(
+            'Could not load Billets aujourd’hui: ${snapshot.error}',
+          );
+        }
         final ticketValue = snapshot.hasData ? '${snapshot.data}' : '—';
         final metrics = repository.metrics
             .map(

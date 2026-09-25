@@ -39,6 +39,8 @@ dependencies:
     git:
       url: https://github.com/dusfan/idempiere_rest.git
       ref: e91d432d4f51f35611edba52515942dbfb15cdee
+  # Used directly by the dashboard KPI for the flight-details endpoint.
+  http: ^1.6.0
   # App-wide auth/session state shared across screens
   provider: ^6.1.2
   # Persist server URL / remembered email across app restarts
