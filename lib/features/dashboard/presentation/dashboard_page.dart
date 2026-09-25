@@ -27,6 +27,13 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   int _activeMobileTab = 0;
+  late final Future<int> _ticketsTodayCount;
+
+  @override
+  void initState() {
+    super.initState();
+    _ticketsTodayCount = widget.repository.ticketsTodayCount;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +71,10 @@ class _DashboardPageState extends State<DashboardPage> {
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(24, 19, 24, 24),
                   child: _DashboardContent(
-                      repository: widget.repository, desktop: true),
+                    repository: widget.repository,
+                    desktop: true,
+                    ticketsTodayCount: _ticketsTodayCount,
+                  ),
                 ),
               ),
             ],
@@ -80,7 +90,11 @@ class _DashboardPageState extends State<DashboardPage> {
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
           child:
-              _DashboardContent(repository: widget.repository, desktop: false),
+              _DashboardContent(
+            repository: widget.repository,
+            desktop: false,
+            ticketsTodayCount: _ticketsTodayCount,
+          ),
         ),
       ),
       bottomNavigationBar: _MobileNavigation(
@@ -98,30 +112,58 @@ class _DashboardPageState extends State<DashboardPage> {
 }
 
 class _DashboardContent extends StatelessWidget {
-  const _DashboardContent({required this.repository, required this.desktop});
+  const _DashboardContent({
+    required this.repository,
+    required this.desktop,
+    required this.ticketsTodayCount,
+  });
 
   final DashboardRepository repository;
   final bool desktop;
+  final Future<int> ticketsTodayCount;
 
   @override
   Widget build(BuildContext context) {
-    final metrics = repository.metrics;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Tableau de bord',
-            style: Theme.of(context).textTheme.headlineMedium),
-        SizedBox(height: desktop ? 23 : 28),
-        _MetricGrid(metrics: metrics, desktop: desktop),
-        SizedBox(height: desktop ? 16 : 22),
-        if (desktop)
-          _DesktopInsights(repository: repository)
-        else
-          SizedBox(
-            height: 250,
-            child: SalesChart(values: repository.sales),
-          ),
-      ],
+    return FutureBuilder<int>(
+      future: ticketsTodayCount,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          debugPrint(
+            'Could not load Billets aujourd’hui: ${snapshot.error}',
+          );
+        }
+        final ticketValue = snapshot.hasData ? '${snapshot.data}' : '—';
+        final metrics = repository.metrics
+            .map(
+              (metric) => metric.label == 'Billets aujourd’hui'
+                  ? Metric(
+                      label: metric.label,
+                      value: ticketValue,
+                      change: metric.change,
+                      isPositive: metric.isPositive,
+                    )
+                  : metric,
+            )
+            .toList(growable: false);
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Tableau de bord',
+                style: Theme.of(context).textTheme.headlineMedium),
+            SizedBox(height: desktop ? 23 : 28),
+            _MetricGrid(metrics: metrics, desktop: desktop),
+            SizedBox(height: desktop ? 16 : 22),
+            if (desktop)
+              _DesktopInsights(repository: repository)
+            else
+              SizedBox(
+                height: 250,
+                child: SalesChart(values: repository.sales),
+              ),
+          ],
+        );
+      },
     );
   }
 }

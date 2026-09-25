@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
 import 'package:idempiere_sales_app/features/dashboard/core/theme/app_theme.dart';
 import 'package:idempiere_sales_app/features/dashboard/domain/dashboard_models.dart';
 
@@ -7,6 +10,7 @@ abstract class DashboardRepository {
   List<double> get sales;
   List<PaymentSummary> get payments;
   List<Flight> get topFlights;
+  Future<int> get ticketsTodayCount;
 }
 
 class MockDashboardRepository implements DashboardRepository {
@@ -118,4 +122,59 @@ class MockDashboardRepository implements DashboardRepository {
         Flight(code: 'EK740', route: 'Alger → Dubaï', rate: '68%'),
         Flight(code: 'QR139', route: 'Alger → Doha', rate: '64%'),
       ];
+
+  @override
+  Future<int> get ticketsTodayCount => Future.value(248);
+}
+
+/// Loads today's ticket total from the ticket-list endpoint specified by the
+/// dashboard API collection.
+class IdempiereDashboardRepository extends MockDashboardRepository {
+  const IdempiereDashboardRepository({
+    required this.baseUrl,
+    required this.accessToken,
+  });
+
+  final String baseUrl;
+  final String accessToken;
+
+  @override
+  Future<int> get ticketsTodayCount async {
+    final today = DateTime.now().toIso8601String().split('T').first;
+    final response = await http.get(
+      Uri.parse('$baseUrl/models/c_order').replace(
+        queryParameters: {
+          r'$select': 'C_Order_ID,documentno',
+          r'$filter':
+              "tickettype in ('1', '2', '3', '4', '5') and "
+              "dateordered ge $today and TypeEntry eq '1'",
+          // We only need the total, so do not download every ticket row.
+          r'$top': '1',
+        },
+      ),
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+    final responseBody = utf8.decode(response.bodyBytes);
+
+    if (response.statusCode != 200) {
+      throw StateError(
+        'Ticket list request failed (${response.statusCode}): '
+        '$responseBody',
+      );
+    }
+
+    final decoded = jsonDecode(responseBody) as Map<String, dynamic>;
+    final rowCount = decoded['row-count'];
+    if (rowCount is num) {
+      return rowCount.toInt();
+    }
+    final parsedRowCount = int.tryParse(rowCount?.toString() ?? '');
+    if (parsedRowCount == null) {
+      throw StateError('Ticket list response does not contain row-count.');
+    }
+    return parsedRowCount;
+  }
 }
