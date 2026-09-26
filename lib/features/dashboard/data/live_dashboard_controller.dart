@@ -65,10 +65,6 @@ class DashboardController extends ChangeNotifier {
       final response = await request.close();
       final rawBody = await response.transform(utf8.decoder).join();
 
-      print('=== DASHBOARD KPI RAW RESPONSE (HTTP ${response.statusCode}) ===');
-      print('URL: $uri');
-      print(rawBody);
-
       if (response.statusCode != HttpStatus.ok) {
         _error = 'Dashboard API returned HTTP ${response.statusCode}.';
         return;
@@ -108,12 +104,6 @@ class DashboardController extends ChangeNotifier {
       final dates = byDate.keys.toList()..sort();
       _chartValues = dates.map((date) => byDate[date]!).toList();
 
-      print('=== DASHBOARD CHART DATA (X-axis = day, Y-axis = sum Total_Bal) ===');
-      print('Dates (${dates.length}):');
-      for (final date in dates) {
-        print('  ${date.toIso8601String().substring(0, 10)} -> ${byDate[date]}');
-      }
-
       _soldeReel = Metric(
         label: 'Solde réel',
         value: _formatAmount(currentBankBalSum),
@@ -133,16 +123,13 @@ class DashboardController extends ChangeNotifier {
         isPositive: pendingSum >= 0,
       );
     } on SocketException catch (e) {
-      print('=== DASHBOARD NETWORK ERROR ===');
-      print(e.toString());
+      debugPrint('=== DASHBOARD NETWORK ERROR ===\n$e');
       _error = 'Network error while loading the dashboard.';
     } on TimeoutException catch (e) {
-      print('=== DASHBOARD TIMEOUT ===');
-      print(e.toString());
+      debugPrint('=== DASHBOARD TIMEOUT ===\n$e');
       _error = 'The dashboard request timed out.';
     } catch (e) {
-      print('=== DASHBOARD PARSE/UNEXPECTED ERROR ===');
-      print(e.toString());
+      debugPrint('=== DASHBOARD PARSE/UNEXPECTED ERROR ===\n$e');
       _error = 'Could not load dashboard data.';
     } finally {
       client.close();
