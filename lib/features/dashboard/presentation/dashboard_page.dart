@@ -1,23 +1,21 @@
 import 'package:flutter/material.dart';
 
 import 'package:idempiere_sales_app/features/dashboard/core/theme/app_theme.dart';
-import 'package:idempiere_sales_app/features/dashboard/data/mock_dashboard_repository.dart';
+import 'package:idempiere_sales_app/features/dashboard/data/live_dashboard_controller.dart';
 import 'package:idempiere_sales_app/features/dashboard/domain/dashboard_models.dart';
+import 'package:idempiere_sales_app/features/dashboard/presentation/widgets/bank_balance_sheet.dart';
 import 'package:idempiere_sales_app/features/dashboard/presentation/widgets/dashboard_sidebar.dart';
 import 'package:idempiere_sales_app/features/dashboard/presentation/widgets/metric_card.dart';
-import 'package:idempiere_sales_app/features/dashboard/presentation/widgets/payment_breakdown.dart';
 import 'package:idempiere_sales_app/features/dashboard/presentation/widgets/sales_chart.dart';
-import 'package:idempiere_sales_app/features/dashboard/presentation/widgets/top_flights.dart';
+import 'package:provider/provider.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({
     super.key,
-    this.repository = const MockDashboardRepository(),
     this.onLogout,
     this.onOpenOrders,
   });
 
-  final DashboardRepository repository;
   final VoidCallback? onLogout;
   final VoidCallback? onOpenOrders;
 
@@ -60,11 +58,10 @@ class _DashboardPageState extends State<DashboardPage> {
                 thickness: 1,
                 color: AppColors.line,
               ),
-              Expanded(
+              const Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(24, 19, 24, 24),
-                  child: _DashboardContent(
-                      repository: widget.repository, desktop: true),
+                  padding: EdgeInsets.fromLTRB(24, 19, 24, 24),
+                  child: _DashboardContent(desktop: true),
                 ),
               ),
             ],
@@ -76,11 +73,10 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Widget _buildMobile() {
     return Scaffold(
-      body: SafeArea(
+      body: const SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
-          child:
-              _DashboardContent(repository: widget.repository, desktop: false),
+          padding: EdgeInsets.fromLTRB(20, 20, 20, 100),
+          child: _DashboardContent(desktop: false),
         ),
       ),
       bottomNavigationBar: _MobileNavigation(
@@ -98,76 +94,101 @@ class _DashboardPageState extends State<DashboardPage> {
 }
 
 class _DashboardContent extends StatelessWidget {
-  const _DashboardContent({required this.repository, required this.desktop});
+  const _DashboardContent({required this.desktop});
 
-  final DashboardRepository repository;
   final bool desktop;
+
+  void _showBankBreakdown(BuildContext context, DashboardController controller) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => BankBalanceSheet(balances: controller.bankBalances),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final metrics = repository.metrics;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Tableau de bord',
-            style: Theme.of(context).textTheme.headlineMedium),
-        SizedBox(height: desktop ? 23 : 28),
-        _MetricGrid(metrics: metrics, desktop: desktop),
-        SizedBox(height: desktop ? 16 : 22),
-        if (desktop)
-          _DesktopInsights(repository: repository)
-        else
-          SizedBox(
-            height: 250,
-            child: SalesChart(values: repository.sales),
-          ),
-      ],
+    return Consumer<DashboardController>(
+      builder: (context, controller, _) {
+        final kpis = <Metric>[
+          controller.soldeReel ??
+              const Metric(
+                  label: 'Solde réel',
+                  value: '···',
+                  change: '',
+                  isPositive: true),
+          controller.soldeTotal ??
+              const Metric(
+                  label: 'Solde total',
+                  value: '···',
+                  change: '',
+                  isPositive: true),
+          controller.soldeEnCours ??
+              const Metric(
+                  label: 'Solde en cours',
+                  value: '···',
+                  change: '',
+                  isPositive: true),
+        ];
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Tableau de bord',
+                style: Theme.of(context).textTheme.headlineMedium),
+            SizedBox(height: desktop ? 23 : 28),
+            _KpiGrid(
+              kpis: kpis,
+              desktop: desktop,
+              onBreakdownTap: () =>
+                  _showBankBreakdown(context, controller),
+            ),
+            SizedBox(height: desktop ? 16 : 22),
+            SizedBox(
+              height: desktop ? 260 : 250,
+              child: SalesChart(values: controller.chartValues),
+            ),
+            if (controller.error != null) ...[
+              const SizedBox(height: 12),
+              Text(controller.error!,
+                  style: const TextStyle(color: AppColors.red)),
+            ],
+          ],
+        );
+      },
     );
   }
 }
 
-class _MetricGrid extends StatelessWidget {
-  const _MetricGrid({required this.metrics, required this.desktop});
+class _KpiGrid extends StatelessWidget {
+  const _KpiGrid({
+    required this.kpis,
+    required this.desktop,
+    required this.onBreakdownTap,
+  });
 
-  final List<Metric> metrics;
+  final List<Metric> kpis;
   final bool desktop;
+  final VoidCallback onBreakdownTap;
 
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
-      itemCount: metrics.length,
+      itemCount: kpis.length,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: desktop ? 4 : 2,
+        crossAxisCount: desktop ? 3 : 1,
         mainAxisSpacing: desktop ? 12 : 13,
         crossAxisSpacing: desktop ? 12 : 13,
         mainAxisExtent: desktop ? 104 : 129,
       ),
-      itemBuilder: (context, index) => MetricCard(metric: metrics[index]),
-    );
-  }
-}
-
-class _DesktopInsights extends StatelessWidget {
-  const _DesktopInsights({required this.repository});
-
-  final DashboardRepository repository;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 260,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(flex: 14, child: SalesChart(values: repository.sales)),
-          const SizedBox(width: 14),
-          Expanded(
-              flex: 10, child: PaymentBreakdown(payments: repository.payments)),
-          const SizedBox(width: 14),
-          Expanded(flex: 10, child: TopFlights(flights: repository.topFlights)),
-        ],
+      itemBuilder: (context, index) => GestureDetector(
+        onTap: onBreakdownTap,
+        child: MetricCard(metric: kpis[index]),
       ),
     );
   }
